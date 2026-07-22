@@ -11,8 +11,8 @@ import os
 @st.cache_data
 def load_data():
     try:
-        # Ganti URL di bawah dengan ID Google Sheet Anda yang sudah diatur menjadi /export?format=xlsx
-        url_sheet = "https://docs.google.com/spreadsheets/d/1pqEUk3sjkrQKeuyWYpCGp_PU-iKfgDYtMu2WN7lixjM/edit?usp=sharing"
+        # URL sudah diubah ujungnya menjadi /export?format=xlsx
+        url_sheet = "https://docs.google.com/spreadsheets/d/1pqEUk3sjkrQKeuyWYpCGp_PU-iKfgDYtMu2WN7lixjM/export?format=xlsx"
         
         df_user = pd.read_excel(url_sheet, sheet_name="User")
         df_dpa = pd.read_excel(url_sheet, sheet_name="Master_DPA")
@@ -129,21 +129,21 @@ def get_tanggal_indo(tgl):
 # ---------------------------------------------------------
 # BACA DATA MASTER EXCEL
 # ---------------------------------------------------------
-@st.cache_data
-def load_data():
-    try:
-        df_user = pd.read_excel("Master_APBDES.xlsx", sheet_name="User")
-        df_dpa = pd.read_excel("Master_APBDES.xlsx", sheet_name="Master_DPA")
-                
-        df_user.columns = df_user.columns.astype(str).str.strip()
-        df_dpa.columns = df_dpa.columns.astype(str).str.strip()
-        
-        return df_user, df_dpa
-    except Exception as e:
-        st.error(f"Gagal membaca file Excel: {e}")
-        return pd.DataFrame(), pd.DataFrame()
-
-df_user, df_dpa = load_data()
+# @st.cache_data
+# def load_data():
+#     try:
+#         df_user = pd.read_excel("Master_APBDES.xlsx", sheet_name="User")
+#         df_dpa = pd.read_excel("Master_APBDES.xlsx", sheet_name="Master_DPA")
+#                 
+#         df_user.columns = df_user.columns.astype(str).str.strip()
+#         df_dpa.columns = df_dpa.columns.astype(str).str.strip()
+#         
+#         return df_user, df_dpa
+#     except Exception as e:
+#         st.error(f"Gagal membaca file Excel: {e}")
+#         return pd.DataFrame(), pd.DataFrame()
+# 
+# df_user, df_dpa = load_data()
 
 # ---------------------------------------------------------
 # UI & LOGIC
