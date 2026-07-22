@@ -36,18 +36,23 @@ def load_data():
         st.error(f"Gagal membaca file Excel: {e}")
         return pd.DataFrame(), pd.DataFrame()
 
-# --- FUNGSI KONEKSI GOOGLE SHEET UNTUK MENYIMPAN ---
+# --- FUNGSI KONEKSI GOOGLE SHEET (VERSI STREAMLIT CLOUD) ---
 def connect_gsheet():
     scopes = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
     try:
-        creds = Credentials.from_service_account_file('credentials.json', scopes=scopes)
+        # 1. Panggil isi rahasia dari Streamlit Secrets dan ubah string jadi dictionary
+        service_account_info = json.loads(st.secrets["gcp_service_account"])
+        
+        # 2. Gunakan .from_service_account_info() BUKAN .from_service_account_file()
+        creds = Credentials.from_service_account_info(service_account_info, scopes=scopes)
+        
         client = gspread.authorize(creds)
-        # Buka berdasarkan URL atau ID
+        # Buka berdasarkan URL
         sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1pqEUk3sjkrQKeuyWYpCGp_PU-iKfgDYtMu2WN7lixjM/edit")
         worksheet = sheet.worksheet("Memory_PBJ")
         return worksheet
     except Exception as e:
-        st.error(f"Gagal koneksi ke Google Sheet. Pastikan credentials.json ada. Error: {e}")
+        st.error(f"Gagal koneksi ke Google Sheet. Error: {e}")
         return None
 
 def get_base64_image(image_path):
