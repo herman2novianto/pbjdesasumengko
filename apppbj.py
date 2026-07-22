@@ -40,10 +40,20 @@ def load_data():
 def connect_gsheet():
     scopes = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
     try:
-        # 1. Panggil isi rahasia dari Streamlit Secrets dan ubah string jadi dictionary
-        service_account_info = json.loads(st.secrets["gcp_service_account"])
+        # 1. Ambil data dari secrets
+        rahasia = st.secrets["gcp_service_account"]
         
-        # 2. Gunakan .from_service_account_info() BUKAN .from_service_account_file()
+        # Cek apakah data terbaca sebagai string JSON atau langsung dictionary
+        if isinstance(rahasia, str):
+            service_account_info = json.loads(rahasia)
+        else:
+            service_account_info = dict(rahasia)
+        
+        # 2. PERBAIKAN UTAMA: Paksa agar karakter '\n' terbaca sebagai enter/baris baru
+        if "private_key" in service_account_info:
+            service_account_info["private_key"] = service_account_info["private_key"].replace('\\n', '\n')
+        
+        # 3. Autentikasi
         creds = Credentials.from_service_account_info(service_account_info, scopes=scopes)
         
         client = gspread.authorize(creds)
