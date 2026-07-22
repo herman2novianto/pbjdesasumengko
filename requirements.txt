@@ -1,5 +1,6 @@
 streamlit
 pandas
+openpyxl
 fpdf
 st-gsheets-connection
 num2words
