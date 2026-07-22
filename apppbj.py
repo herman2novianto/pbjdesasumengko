@@ -8,6 +8,23 @@ import base64
 import json
 import os
 
+@st.cache_data
+def load_data():
+    try:
+        # Ganti URL di bawah dengan ID Google Sheet Anda yang sudah diatur menjadi /export?format=xlsx
+        url_sheet = "https://docs.google.com/spreadsheets/d/ID_GOOGLE_SHEET_ANDA/export?format=xlsx"
+        
+        df_user = pd.read_excel(url_sheet, sheet_name="User")
+        df_dpa = pd.read_excel(url_sheet, sheet_name="Master_DPA")
+                
+        df_user.columns = df_user.columns.astype(str).str.strip()
+        df_dpa.columns = df_dpa.columns.astype(str).str.strip()
+        
+        return df_user, df_dpa
+    except Exception as e:
+        st.error(f"Gagal membaca file Excel: {e}")
+        return pd.DataFrame(), pd.DataFrame()
+
 # 1. Pastikan blok fungsi ini ADA dan ditulis LEBIH DULU
 @st.cache_data
 def get_base64_image(image_path):
