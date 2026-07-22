@@ -12,7 +12,7 @@ import os
 def load_data():
     try:
         # Ganti URL di bawah dengan ID Google Sheet Anda yang sudah diatur menjadi /export?format=xlsx
-        url_sheet = "https://docs.google.com/spreadsheets/d/ID_GOOGLE_SHEET_ANDA/export?format=xlsx"
+        url_sheet = "https://docs.google.com/spreadsheets/d/1pqEUk3sjkrQKeuyWYpCGp_PU-iKfgDYtMu2WN7lixjM/edit?usp=sharing"
         
         df_user = pd.read_excel(url_sheet, sheet_name="User")
         df_dpa = pd.read_excel(url_sheet, sheet_name="Master_DPA")
