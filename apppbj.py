@@ -8,23 +8,16 @@ import base64
 import json
 import os
 
+# 1. Pastikan blok fungsi ini ADA dan ditulis LEBIH DULU
 @st.cache_data
-def load_data():
+def get_base64_image(image_path):
     try:
-        # Ganti URL di bawah dengan ID Google Sheet Anda yang sudah diatur menjadi /export?format=xlsx
-        url_sheet = "https://docs.google.com/spreadsheets/d/1pqEUk3sjkrQKeuyWYpCGp_PU-iKfgDYtMu2WN7lixjM/edit?usp=sharing"
-        
-        df_user = pd.read_excel(url_sheet, sheet_name="User")
-        df_dpa = pd.read_excel(url_sheet, sheet_name="Master_DPA")
-                
-        df_user.columns = df_user.columns.astype(str).str.strip()
-        df_dpa.columns = df_dpa.columns.astype(str).str.strip()
-        
-        return df_user, df_dpa
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode('utf-8')
     except Exception as e:
-        st.error(f"Gagal membaca file Excel: {e}")
-        return pd.DataFrame(), pd.DataFrame()
+        return ""
 
+# 2. BARU dipanggil di bawahnya
 logo_ngawi_b64 = get_base64_image("logo_ngawi.png")
 
 st.set_page_config(page_title="PBJ SUMENGKO Generator", layout="wide")
