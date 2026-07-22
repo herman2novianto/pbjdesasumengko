@@ -25,6 +25,13 @@ def load_data():
         st.error(f"Gagal membaca file Excel: {e}")
         return pd.DataFrame(), pd.DataFrame()
 
+def get_base64_image(image_path):
+    try:
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode('utf-8')
+    except Exception as e:
+        return ""
+
 # 2. BARU dipanggil di bawahnya
 logo_ngawi_b64 = get_base64_image("logo_ngawi.png")
 
