@@ -148,6 +148,9 @@ def get_tanggal_indo(tgl):
 # ---------------------------------------------------------
 # UI & LOGIC
 # ---------------------------------------------------------
+# Panggil fungsi load_data() dari atas untuk mengisi variabel
+df_user, df_dpa = load_data()
+
 if not df_user.empty and not df_dpa.empty:
     tab_utama, tab_paket, tab_cetak, tab_pelaksanaan, tab_pelaporan1, tab_pelaporan2 = st.tabs([
         "1. Tahap Persiapan - Data Utama", 
