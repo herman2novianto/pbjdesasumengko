@@ -10,6 +10,59 @@ import os
 import gspread # TAMBAHAN
 from google.oauth2.service_account import Credentials # TAMBAHAN
 
+# --- KONFIGURASI HALAMAN ---
+st.set_page_config(page_title="PBJ SUMENGKO Generator", layout="wide")
+
+# ==========================================
+# --- FITUR PASSWORD UTAMA TINGKAT APLIKASI ---
+# ==========================================
+def check_password():
+    """Mengembalikan True jika pengguna telah memasukkan password yang benar."""
+    
+    # SILAKAN GANTI PASSWORD ANDA DI SINI
+    PASSWORD_BENAR = "SumengkoPBJ999" 
+
+    def password_entered():
+        """Mengecek apakah password yang dimasukkan benar."""
+        if st.session_state["password_input"] == PASSWORD_BENAR:
+            st.session_state["password_correct"] = True
+            del st.session_state["password_input"]  # Hapus password dari memory demi keamanan
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        # Menampilkan form password jika baru pertama kali buka
+        st.markdown("<h2 style='text-align: center;'>🔒 Akses Terbatas</h2>", unsafe_allow_html=True)
+        st.text_input(
+            "Masukkan Password Utama untuk mengakses aplikasi:",
+            type="password",
+            on_change=password_entered,
+            key="password_input"
+        )
+        return False
+    elif not st.session_state["password_correct"]:
+        # Menampilkan form password + peringatan jika password salah
+        st.markdown("<h2 style='text-align: center;'>🔒 Akses Terbatas</h2>", unsafe_allow_html=True)
+        st.text_input(
+            "Masukkan Password Utama untuk mengakses aplikasi:",
+            type="password",
+            on_change=password_entered,
+            key="password_input"
+        )
+        st.error("😕 Password yang Anda masukkan salah. Silakan coba lagi.")
+        return False
+    else:
+        # Jika password benar, kembalikan True
+        return True
+
+# JIKA PASSWORD BELUM BENAR, HENTIKAN KODE SAMPAI DI SINI
+if not check_password():
+    st.stop()
+
+# ==========================================
+# --- KODE APLIKASI UTAMA (JIKA LOGIN SUKSES) ---
+# ==========================================
+
 # --- ATURAN HAK AKSES KODE REKENING ---
 ATURAN_REKENING = {
     "Lugas Khalid Maulana": ("1",),
@@ -74,13 +127,17 @@ def get_base64_image(image_path):
 
 logo_ngawi_b64 = get_base64_image("logo_ngawi.png")
 
-st.set_page_config(page_title="PBJ SUMENGKO Generator", layout="wide")
 st.title("Aplikasi Pembuat Dokumen PBJ Desa Sumengko")
 
 # ---------------------------------------------------------
 # FITUR MEMORI CLOUD (GOOGLE SHEET) DI SIDEBAR
 # ---------------------------------------------------------
 with st.sidebar:
+    # Tombol Logout (opsional, untuk menghapus session dan mengunci app kembali)
+    if st.button("Logout Aplikasi", key="btn_logout"):
+        del st.session_state["password_correct"]
+        st.rerun()
+
     st.header("☁️ Memori Cloud (G-Sheet)")
     st.write("Simpan/muat progres isian form ke Sheet 'Memory_PBJ'.")
     
@@ -91,7 +148,7 @@ with st.sidebar:
     if st.button("Simpan Data ke Cloud", type="primary"):
         state_to_save = {}
         for k, v in st.session_state.items():
-            if k.startswith("cetak_"):
+            if k.startswith("cetak_") or k == "password_correct" or k == "password_input":
                 continue
             if isinstance(v, (str, int, float, bool, list)):
                 state_to_save[k] = v
@@ -106,7 +163,6 @@ with st.sidebar:
             # Simpan 3 kolom: Waktu, Nama_File, Data_JSON
             ws.append_row([timestamp, nama_file_baru, json_string])
             st.success(f"Data {nama_file_baru} berhasil disimpan ke Google Sheet!")
-            # st.rerun() dihapus agar tidak me-refresh paksa sebelum sukses dibaca
 
     st.markdown("---")
     st.subheader("📂 Muat Data Tersimpan")
@@ -223,7 +279,7 @@ if not df_user.empty and not df_dpa.empty:
             if awalan_diizinkan:
                 rab_kegiatan = rab_mentah[rab_mentah['Kode_Rekening'].str.startswith(awalan_diizinkan)]
             else:
-                rab_kegiatan = rab_mentah # Jika nama user tidak ada di dict, tampilkan semua (bisa diubah jadi kosong jika ingin blokir total)
+                rab_kegiatan = rab_mentah # Jika nama user tidak ada di dict, tampilkan semua
             # ----------------------------------------
             
             if rab_kegiatan.empty:
@@ -235,7 +291,6 @@ if not df_user.empty and not df_dpa.empty:
                 else:
                     st.warning("Kolom 'Uraian' tidak ditemukan di Excel.")
         
-        # (Kode Generate PDF RAB SISKEUDES dsb tetap SAMA PERSIS seperti milik Anda)
         st.markdown("---")
         st.subheader("Cetak Dokumen RAB Siskeudes")
         if st.button("Generate PDF - RAB Siskeudes", type="primary"):
@@ -344,8 +399,6 @@ if not df_user.empty and not df_dpa.empty:
                 mime="application/pdf"
             )
 
-    # === TAB 2 SAMPAI BAWAH TIDAK ADA PERUBAHAN LOGIKA, KARENA DATA 'daftar_uraian' SUDAH TERFILTER DARI ATAS ===
-    # KODE UNTUK TAB 2, 3, 4, 5, 6 SAMA SEPERTI KODE ASLI ANDA
     with tab_paket:
         st.header("Pembagian HPS dan Spesifikasi per Supplier")
         jml_paket = st.number_input("Berapa Paket Belanja / Supplier?", min_value=1, max_value=10, step=1, key="jml_paket")
@@ -414,7 +467,6 @@ if not df_user.empty and not df_dpa.empty:
                     "detail_barang": detail_barang 
                 })
 
-    # === TAB 3: Tahap Persiapan - CETAK DOKUMEN PERSIAPAN ===
     with tab_cetak:
         st.header("Cetak Dokumen Persiapan Supplier (PDF)")
         st.write("Klik tombol di bawah untuk membuat dokumen HPS, Pakta Integritas, dan KAK per Paket/Supplier.")
@@ -626,7 +678,6 @@ if not df_user.empty and not df_dpa.empty:
                         mime="application/pdf"
                     )
 
-    # === TAB 4: TAHAP PELAKSANAAN - INPUT & CETAK DOKUMEN ===
     with tab_pelaksanaan:
         st.header("Cetak Dokumen Pelaksanaan (Surat Pesanan & BA Negosiasi)")
         
@@ -917,7 +968,6 @@ if not df_user.empty and not df_dpa.empty:
                                 mime="application/pdf"
                             )
 
-    # === TAB 5: TAHAP PELAPORAN 1 - PENYEDIA ===
     with tab_pelaporan1:
         st.header("Cetak Laporan: BA Pemeriksaan & BA Serah Terima (Penyedia ke PKA)")
         
@@ -1107,7 +1157,6 @@ if not df_user.empty and not df_dpa.empty:
                                 mime="application/pdf"
                             )
                             
-    # === TAB 6: TAHAP PELAPORAN 2 - KADES (KONSOLIDASI) ===
     with tab_pelaporan2:
         st.header("Cetak Laporan Penyerahan ke Kepala Desa (Konsolidasi)")
         st.write("Dokumen ini akan merangkum dan menggabungkan seluruh paket belanja yang telah diselesaikan ke dalam satu Surat dan BAST.")
