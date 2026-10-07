@@ -67,7 +67,7 @@ if not check_password():
 ATURAN_REKENING = {
     "Lugas Khalid Maulana": ("1",),
     "Puspita Sari Handayani, SE": ("2",),
-    "Agus Setiawan, S.Pd": ("3",),
+    "Shoim Syah": ("3",),
     "Ramli Nur Aziza": ("4",),
     "Galur Rismawati, SE": ("5",),
     "Herman Dwi": ("1", "2", "3", "4", "5")
